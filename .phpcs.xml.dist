@@ -14,7 +14,7 @@
     <!-- Do not fail PHPCS CI over warnings -->
     <config name="ignore_warnings_on_exit" value="1"/>
 
-    <config name="minimum_supported_wp_version" value="4.8"/>
+    <config name="minimum_supported_wp_version" value="4"/>
 
 
     <rule ref="WordPress">

@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  wplogging_db:
+    container_name: wplogging_db
+    user: ${DOCKER_RUN_USER:-1000}:${DOCKER_RUN_GROUP:-1000}
+    image: mysql:8.0.20
+    command: --default-authentication-plugin=mysql_native_password
+    restart: on-failure:1
+    environment:
+      MYSQL_DATABASE: wplogging
+      MYSQL_USER: wplogging
+      MYSQL_PASSWORD: wplogging
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3308:3306" # Change 3308 to another port to access it locally.
+    volumes:
+      - ./docker/wplogging_db/data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysql wplogging -uwplogging -pwplogging -e 'SELECT 1;'  || exit 1"]
+      interval: 2s
+      retries: 120
+
+  wplogging_php:
+    container_name: wplogging_php
+    image: lucasbustamante/wp-develop:0.3
+    depends_on:
+      wplogging_db:
+        condition: service_healthy
+    user: ${DOCKER_RUN_USER:-1000}:${DOCKER_RUN_GROUP:-1000}
+    restart: on-failure:1
+    environment:
+      - WP_CLI_CACHE_DIR=/var/wplogging/.cache/.wp-cli/cache
+      - WP_CLI_ALLOW_ROOT=1
+      - PHP_IDE_CONFIG=serverName=WPLogging
+    volumes:
+      # This file can get big. While docker is stopped, create an empty text file in this path and uncomment it to debug Xdebug.
+      #- ./dev/xdebug.log:/var/wplogging/xdebug.log
+      - ./:/var/wplogging
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -2,3 +2,5 @@ dev
 /vendor/
 .cache
 .idea
+tests/tmp
+docker/wplogging_db/data
