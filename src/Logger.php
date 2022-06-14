@@ -15,13 +15,13 @@ class Logger implements LoggerInterface {
 	/** @var LoggerStorageInterface $storage */
 	protected $storage;
 
-	public function register() {
+	protected function register() {
 		// Early bail: Already registered.
 		if ( ! is_null( $this->storage ) ) {
 			return;
 		}
 
-		$this->storage = apply_filters( 'wplogging_storage', [ $this, 'make_database_storage' ] );
+		$this->storage = call_user_func( apply_filters( 'wplogging_storage', [ $this, 'make_database_storage' ] ) );
 	}
 
 	/**
@@ -29,6 +29,10 @@ class Logger implements LoggerInterface {
 	 */
 	public function make_database_storage() {
 		return new LoggerDatabaseStorage();
+	}
+
+	public function get( $qty = 50, $page = 1, $group = '', $search = '' ) {
+		return $this->storage->get( $qty, $page, $group, $search );
 	}
 
 	/**

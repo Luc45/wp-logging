@@ -14,8 +14,8 @@ interface LoggerStorageInterface {
 	public function store( $message, $type, $context = '', $group = '' );
 
 	/**
-	 * @param int $qty
-	 * @param int $page
+	 * @param int    $qty
+	 * @param int    $page
 	 * @param string $group
 	 * @param string $search
 	 *

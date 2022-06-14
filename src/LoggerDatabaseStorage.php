@@ -9,8 +9,8 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	 * manage its information.
 	 */
 	const TABLE_NOT_EXIST = - 1;
-	const TABLE_EXISTS = 0;
-	const TABLE_CREATED = 1;
+	const TABLE_EXISTS    = 0;
+	const TABLE_CREATED   = 1;
 
 	/**
 	 * The current table state, or `null` if the current table state has never been
@@ -30,37 +30,46 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	/**
 	 * @param $message
 	 * @param $type
-	 * @param string $context
+	 * @param string  $context
 	 * @param $group
 	 *
 	 * @return void
 	 */
 	public function store( $message, $type, $context = '', $group = '' ) {
-		$this->check_table();
-		global $wpdb;
-		$wpdb_logging_table = static::get_table_name();
+		if ( $this->check_table() === self::TABLE_NOT_EXIST ) {
+			return;
+		}
 
-		$result = $wpdb->query( $wpdb->prepare( "INSERT INTO `$wpdb_logging_table` (`message`, `type`, `group`, `created_at`) VALUES (%s, %s, %s, %s)", $message, $type, $group, date( 'Y-m-d H:i:s', time() ) ) );
+		global $wpdb;
+
+		$table_name = static::get_table_name();
+		$result     = $wpdb->query( $wpdb->prepare( "INSERT INTO `$table_name` (`message`, `log_type`, `log_group`, `created_at`) VALUES (%s, %s, %s, %s)", $message, $type, $group, date( 'Y-m-d H:i:s', time() ) ) );
 	}
 
-	public function get( $qty = 50, $page = 1, $group = '', $search = '' ) {
+	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search = '' ) {
 		$this->check_table();
 		global $wpdb;
-		$wpdb_logging_table = static::get_table_name();
 
-		$where = $wpdb->prepare( "SELECT * FROM `$wpdb_logging_table` WHERE 1=1" );
+		$table_name = static::get_table_name();
+		$where      = "SELECT * FROM `$table_name` WHERE 1=1";
 
 		if ( ! empty( $group ) ) {
-			$where .= $wpdb->prepare( " AND `group` = '%s'", $group );
+			$where .= $wpdb->prepare( " AND `log_group` = '%s'", $group );
+		}
+
+		if ( ! empty( $type ) ) {
+			$where .= $wpdb->prepare( " AND `log_type` = '%s'", $type );
 		}
 
 		if ( ! empty( $search ) ) {
 			$where .= $wpdb->prepare( " AND `message` LIKE '%s'", $wpdb->esc_like( $search ) );
 		}
 
-		$where .= $wpdb->prepare( "LIMIT %d %d", max( 0, ( $page - 1 ) ) * $qty, max( 1, $qty ) );
+		$where .= $wpdb->prepare( ' LIMIT %d, %d', max( 0, ( $page - 1 ) ) * $qty, max( 1, $qty ) );
 
-		$results = $wpdb->get_results( $where );
+		$results = $wpdb->get_results( $where, ARRAY_A );
+
+		return $results;
 	}
 
 	/**
@@ -212,8 +221,8 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 		$table_sql   = "CREATE TABLE {$queue_table} (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             message LONGTEXT DEFAULT NULL,
-            type VARCHAR(1000) DEFAULT NULL,
-            group VARCHAR(1000) DEFAULT NULL,
+            log_type VARCHAR(1000) DEFAULT NULL,
+            log_group VARCHAR(1000) DEFAULT NULL,
             created_at DATETIME DEFAULT NULL,
             PRIMARY KEY  (id)
             ) COLLATE {$collate}";

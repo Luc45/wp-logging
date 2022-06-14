@@ -1,1 +1,1 @@
-{"version":1,"defects":{"LoggerTest::test_foo":3},"times":{"LoggerTest::test_foo":0.001}}
+{"version":1,"defects":{"LoggerTest::test_foo":3,"LoggerTest::test_add_log":2},"times":{"LoggerTest::test_foo":0.001,"LoggerTest::test_add_log":0.007}}
