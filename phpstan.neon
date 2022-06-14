@@ -1,0 +1,15 @@
+includes:
+  - /app/vendor/szepeviktor/phpstan-wordpress/extension.neon
+parameters:
+  level: 6
+  paths:
+    - /app/src
+  tmpDir: /app/.cache
+  parallel:
+    jobSize: 10
+    maximumNumberOfProcesses: 32
+    minimumNumberOfJobsPerProcess: 2
+  inferPrivatePropertyTypeFromConstructor: true
+  reportUnmatchedIgnoredErrors: false
+  ignoreErrors:
+    - '#.*on an unknown class WP_CLI.$#'
