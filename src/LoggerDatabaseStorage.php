@@ -9,14 +9,14 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	 * manage its information.
 	 */
 	const TABLE_NOT_EXIST = - 1;
-	const TABLE_EXISTS    = 0;
-	const TABLE_CREATED   = 1;
+	const TABLE_EXISTS = 0;
+	const TABLE_CREATED = 1;
 
 	/**
 	 * The current table state, or `null` if the current table state has never been
 	 * assessed before.
 	 *
-	 * @var string|null
+	 * @var int|null
 	 */
 	private $table_state;
 
@@ -27,12 +27,40 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	 */
 	const TABLE_VERSION_KEY = 'wp_logging_table_version';
 
-	public function store( $message, $type, array $context = [], $group = '' ) {
-		// TODO: Implement store() method.
+	/**
+	 * @param $message
+	 * @param $type
+	 * @param string $context
+	 * @param $group
+	 *
+	 * @return void
+	 */
+	public function store( $message, $type, $context = '', $group = '' ) {
+		$this->check_table();
+		global $wpdb;
+		$wpdb_logging_table = static::get_table_name();
+
+		$result = $wpdb->query( $wpdb->prepare( "INSERT INTO `$wpdb_logging_table` (`message`, `type`, `group`, `created_at`) VALUES (%s, %s, %s, %s)", $message, $type, $group, date( 'Y-m-d H:i:s', time() ) ) );
 	}
 
 	public function get( $qty = 50, $page = 1, $group = '', $search = '' ) {
-		// TODO: Implement get() method.
+		$this->check_table();
+		global $wpdb;
+		$wpdb_logging_table = static::get_table_name();
+
+		$where = $wpdb->prepare( "SELECT * FROM `$wpdb_logging_table` WHERE 1=1" );
+
+		if ( ! empty( $group ) ) {
+			$where .= $wpdb->prepare( " AND `group` = '%s'", $group );
+		}
+
+		if ( ! empty( $search ) ) {
+			$where .= $wpdb->prepare( " AND `message` LIKE '%s'", $wpdb->esc_like( $search ) );
+		}
+
+		$where .= $wpdb->prepare( "LIMIT %d %d", max( 0, ( $page - 1 ) ) * $qty, max( 1, $qty ) );
+
+		$results = $wpdb->get_results( $where );
 	}
 
 	/**
@@ -47,6 +75,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	 *             table status.
 	 */
 	public function check_table( $force = false ) {
+		// Early bail: Already checked in this request.
 		if ( ! $force && $this->table_state !== null ) {
 			return $this->table_state;
 		}
@@ -55,7 +84,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 
 		$table_version = get_option( self::TABLE_VERSION_KEY, '0.0.0' );
 
-		// Trigger an update or creation if either the table should be update, or it does not exist.
+		// Trigger an update or creation if either the table should be updated, or it does not exist.
 		if ( version_compare( $table_version, $this->get_table_version(), '<' ) || ! $this->table_exists() ) {
 			$table_state = $this->update_table();
 
@@ -104,7 +133,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 		add_filter( 'dbdelta_queries', $collect_db_delta_queries );
 		dbDelta( $table_sql, false );
 
-		// Run the collected queries in a transaction using the current db adapter.
+		// Run the collected queries in a transaction.
 		if ( $wpdb->query( 'START TRANSACTION' ) === false ) {
 			return self::TABLE_NOT_EXIST;
 		}

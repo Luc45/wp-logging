@@ -12,12 +12,21 @@ class Logger implements LoggerInterface {
 	const INFO      = 'info';
 	const DEBUG     = 'debug';
 
+	/** @var LoggerStorageInterface $storage */
 	protected $storage;
 
-	public function init() {
+	public function register() {
+		// Early bail: Already registered.
+		if ( ! is_null( $this->storage ) ) {
+			return;
+		}
+
 		$this->storage = apply_filters( 'wplogging_storage', [ $this, 'make_database_storage' ] );
 	}
 
+	/**
+	 * @return LoggerStorageInterface
+	 */
 	public function make_database_storage() {
 		return new LoggerDatabaseStorage();
 	}
@@ -34,6 +43,8 @@ class Logger implements LoggerInterface {
 	 * @throws \InvalidArgumentException
 	 */
 	public function log( $level, $message, array $context = [] ) {
+		$this->register();
+		$this->storage->store( $message, $level, wp_json_encode( $context ) );
 	}
 
 	/**
