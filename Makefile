@@ -77,6 +77,9 @@ reset: ## Reset the development environment.
 	# Reset database and filesystem
 	sudo rm -rf ./docker/wplogging_db/data ./tests/tmp/*
 	# Re-create folders to avoid Docker permission issues.
+	ls -la
+	ls -la ./docker/
+	ls -la ./docker/wplogging_db
 	mkdir -p ./docker/wplogging_db/data
 	mkdir -p ./tests/tmp
 	# Create cache folder if it doesn't exist
