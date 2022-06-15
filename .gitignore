@@ -3,5 +3,6 @@ dev
 .cache
 .idea
 tests/tmp
-docker/wplogging_db/data
+docker/wplogging_db/data/*
+!docker/wplogging_db/data/.gitkeep
 .phpunit.result.cache
