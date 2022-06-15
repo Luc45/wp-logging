@@ -19,7 +19,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "mysql wplogging -uwplogging -pwplogging -e 'SELECT 1;'  || exit 1"]
       interval: 2s
-      retries: 120
+      retries: 30
 
   wplogging_php:
     container_name: wplogging_php
