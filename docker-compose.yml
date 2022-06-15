@@ -17,7 +17,7 @@ services:
     volumes:
       - ./docker/wplogging_db/data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysql wplogging -uwplogging -pwplogging -hwplogging_db -e 'SELECT 1;'  || exit 1"]
+      test: ["CMD-SHELL", "mysql wplogging -uroot -proot -e 'SELECT 1;' || exit 1"]
       interval: 2s
       retries: 30
 
