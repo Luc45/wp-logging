@@ -22,6 +22,6 @@ jobs:
       - name: Start Docker Containers
         run: make up
       - name: Setup Unit tests environment
-        run: make setup
+        run: make setup_unit
       - name: Run Unit tests
         run: make phpunit
