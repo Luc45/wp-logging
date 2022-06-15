@@ -16,18 +16,12 @@ services:
       - "3308:3306" # Change 3308 to another port to access it locally.
     volumes:
       - ./docker/wplogging_db/data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD-SHELL", 'mysqladmin ping']
-      interval: 1s
-      retries: 30
-      timeout: 3s
 
   wplogging_php:
     container_name: wplogging_php
     image: lucasbustamante/wp-develop:0.3
     depends_on:
-      wplogging_db:
-        condition: service_healthy
+      - wplogging_db
     user: ${DOCKER_RUN_USER:-1000}:${DOCKER_RUN_GROUP:-1000}
     restart: on-failure:1
     environment:
