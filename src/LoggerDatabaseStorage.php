@@ -49,7 +49,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	/**
 	 * @inheritdoc
 	 */
-	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search = '' ) {
+	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search_message = '' ) {
 		if ( $this->check_table() === self::TABLE_NOT_EXIST ) {
 			return [];
 		}
@@ -67,8 +67,8 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 			$where .= $wpdb->prepare( ' AND `log_type` = %s', $type );
 		}
 
-		if ( ! empty( $search ) ) {
-			$where .= $wpdb->prepare( ' AND `message` LIKE %s', $wpdb->esc_like( $search ) );
+		if ( ! empty( $search_message ) ) {
+			$where .= $wpdb->prepare( ' AND `message` LIKE %s', $wpdb->esc_like( $search_message ) );
 		}
 
 		$where .= $wpdb->prepare( ' LIMIT %d, %d', max( 0, ( $page - 1 ) ) * $qty, max( 1, $qty ) );
@@ -83,8 +83,8 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	 *
 	 * If the table does not exist, then the method will try to create or update it.
 	 *
-	 * @param false $force Whether to force the check on the table or trust the state
-	 *                     cached from a previous check.
+	 * @param bool $force Whether to force the check on the table or trust the state
+	 *                    cached from a previous check.
 	 *
 	 * @return int The value of one of the `TABLE` class constants to indicate the
 	 *             table status.
@@ -263,6 +263,11 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 		return '1.0.0';
 	}
 
+	/**
+	 * Deletes all log entries.
+	 *
+	 * @return void
+	 */
 	public function purge() {
 		global $wpdb;
 		$table_name = self::get_table_name();

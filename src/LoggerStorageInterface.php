@@ -17,9 +17,10 @@ interface LoggerStorageInterface {
 	 * @param int    $qty How many results per page.
 	 * @param int    $page Page parameter.
 	 * @param string $group Which log group to retrieve results for.
+	 * @param string $type Which log type to retrieve results for.
 	 * @param string $search_message Which log message to search for.
 	 *
-	 * @return array
+	 * @return array<scalar>
 	 */
-	public function get( $qty = 50, $page = 1, $group = '', $search_message = '' );
+	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search_message = '' );
 }

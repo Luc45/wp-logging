@@ -12,26 +12,23 @@ class Logger implements LoggerInterface {
 	const INFO      = 'info';
 	const DEBUG     = 'debug';
 
-	/** @var LoggerStorageInterface $storage */
+	/** @var LoggerStorageInterface|null $storage */
 	protected $storage;
 
-	/** @var LoggerStorageInterface $fallback_storage */
+	/** @var LoggerStorageInterface|null $fallback_storage */
 	protected $fallback_storage;
 
+	/**
+	 * @return void
+	 */
 	protected function register() {
 		// Early bail: Already registered.
 		if ( ! is_null( $this->storage ) ) {
 			return;
 		}
 
-		$this->storage          = call_user_func( apply_filters( 'wplogging_storage', [
-			$this,
-			'make_database_storage',
-		] ) );
-		$this->fallback_storage = call_user_func( apply_filters( 'wplogging_fallback_storage', [
-			$this,
-			'make_error_log_storage',
-		] ) );
+		$this->storage          = call_user_func( apply_filters( 'wplogging_storage', [ $this, 'make_database_storage' ] ) );
+		$this->fallback_storage = call_user_func( apply_filters( 'wplogging_fallback_storage', [ $this, 'make_error_log_storage' ] ) );
 	}
 
 	/**
@@ -41,16 +38,25 @@ class Logger implements LoggerInterface {
 		return new LoggerDatabaseStorage();
 	}
 
-	public function get( $qty = 50, $page = 1, $group = '', $search = '' ) {
-		return $this->storage->get( $qty, $page, $group, $search );
+	/**
+	 * @param int    $qty How many results per page.
+	 * @param int    $page Page parameter.
+	 * @param string $group Which log group to retrieve results for.
+	 * @param string $type Which log type to retrieve results for.
+	 * @param string $search_message Which log message to search for.
+	 *
+	 * @return array<scalar>
+	 */
+	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search_message = '' ) {
+		return $this->storage->get( $qty, $page, $group, $type, $search_message );
 	}
 
 	/**
 	 * Logs with an arbitrary level.
 	 *
-	 * @param mixed  $level
-	 * @param string $message
-	 * @param array  $context
+	 * @param string                          $level The level of the log.
+	 * @param string                          $message The message to log.
+	 * @param array<scalar|\JsonSerializable> $context Additional context data related to this log entry.
 	 *
 	 * @return void
 	 */
@@ -60,6 +66,11 @@ class Logger implements LoggerInterface {
 		try {
 			$this->storage->store( $message, $level, wp_json_encode( $context ) );
 		} catch ( \Exception $e ) {
+			// Early bail: Fallback storage disabled.
+			if ( is_null( $this->fallback_storage ) ) {
+				return;
+			}
+
 			try {
 				$this->fallback_storage->store( $message, $level, wp_json_encode( $context ) );
 			} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
@@ -71,8 +82,8 @@ class Logger implements LoggerInterface {
 	/**
 	 * System is unusable.
 	 *
-	 * @param string $message
-	 * @param array  $context
+	 * @param string                          $message
+	 * @param array<scalar|\JsonSerializable> $context
 	 *
 	 * @return void
 	 */
@@ -86,8 +97,8 @@ class Logger implements LoggerInterface {
 	 * Example: Entire website down, database unavailable, etc. This should
 	 * trigger the SMS alerts and wake you up.
 	 *
-	 * @param string $message
-	 * @param array  $context
+	 * @param string                          $message
+	 * @param array<scalar|\JsonSerializable> $context
 	 *
 	 * @return void
 	 */
@@ -100,8 +111,8 @@ class Logger implements LoggerInterface {
 	 *
 	 * Example: Application component unavailable, unexpected exception.
 	 *
-	 * @param string $message
-	 * @param array  $context
+	 * @param string                          $message
+	 * @param array<scalar|\JsonSerializable> $context
 	 *
 	 * @return void
 	 */
@@ -113,8 +124,8 @@ class Logger implements LoggerInterface {
 	 * Runtime errors that do not require immediate action but should typically
 	 * be logged and monitored.
 	 *
-	 * @param string $message
-	 * @param array  $context
+	 * @param string                          $message
+	 * @param array<scalar|\JsonSerializable> $context
 	 *
 	 * @return void
 	 */
@@ -128,8 +139,8 @@ class Logger implements LoggerInterface {
 	 * Example: Use of deprecated APIs, poor use of an API, undesirable things
 	 * that are not necessarily wrong.
 	 *
-	 * @param string $message
-	 * @param array  $context
+	 * @param string                          $message
+	 * @param array<scalar|\JsonSerializable> $context
 	 *
 	 * @return void
 	 */
@@ -140,8 +151,8 @@ class Logger implements LoggerInterface {
 	/**
 	 * Normal but significant events.
 	 *
-	 * @param string $message
-	 * @param array  $context
+	 * @param string                          $message
+	 * @param array<scalar|\JsonSerializable> $context
 	 *
 	 * @return void
 	 */
@@ -154,8 +165,8 @@ class Logger implements LoggerInterface {
 	 *
 	 * Example: User logs in, SQL logs.
 	 *
-	 * @param string $message
-	 * @param array  $context
+	 * @param string                          $message
+	 * @param array<scalar|\JsonSerializable> $context
 	 *
 	 * @return void
 	 */
@@ -166,8 +177,8 @@ class Logger implements LoggerInterface {
 	/**
 	 * Detailed debug information.
 	 *
-	 * @param string $message
-	 * @param array  $context
+	 * @param string                          $message
+	 * @param array<scalar|\JsonSerializable> $context
 	 *
 	 * @return void
 	 */
