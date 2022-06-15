@@ -17,7 +17,7 @@ services:
     volumes:
       - ./docker/wplogging_db/data:/var/lib/mysql
     healthcheck:
-      test: "/usr/bin/mysql --user=wplogging --password=wplogging --execute 'SHOW DATABASES;' --host=wplogging_db wplogging || exit 1"
+      test: ["CMD-SHELL", 'mysqladmin ping']
       interval: 1s
       retries: 30
       timeout: 3s
