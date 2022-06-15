@@ -1,9 +1,9 @@
-name: QA Checks
+name: PHPCS Tests
 on:
   push
 jobs:
-  qa_checks:
-    name: QA Checks
+  phpcs_tests:
+    name: PHPCS Tests
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
@@ -18,9 +18,3 @@ jobs:
         run: make composer ARGS=install
       - name: PHPCS checks
         run: make phpcs
-      - name: PHPStan checks
-        run: make phpstan
-      - name: Setup Unit tests environment
-        run: make up
-      - name: Run Unit tests
-        run: make phpunit
