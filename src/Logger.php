@@ -15,13 +15,17 @@ class Logger implements LoggerInterface {
 	/** @var LoggerStorageInterface $storage */
 	protected $storage;
 
+	/** @var LoggerStorageInterface $fallback_storage */
+	protected $fallback_storage;
+
 	protected function register() {
 		// Early bail: Already registered.
 		if ( ! is_null( $this->storage ) ) {
 			return;
 		}
 
-		$this->storage = call_user_func( apply_filters( 'wplogging_storage', [ $this, 'make_database_storage' ] ) );
+		$this->storage          = call_user_func( apply_filters( 'wplogging_storage', [ $this, 'make_database_storage' ] ) );
+		$this->fallback_storage = call_user_func( apply_filters( 'wplogging_fallback_storage', [ $this, 'make_error_log_storage' ] ) );
 	}
 
 	/**
@@ -48,7 +52,12 @@ class Logger implements LoggerInterface {
 	 */
 	public function log( $level, $message, array $context = [] ) {
 		$this->register();
-		$this->storage->store( $message, $level, wp_json_encode( $context ) );
+
+		try {
+			$this->storage->store( $message, $level, wp_json_encode( $context ) );
+		} catch ( \Exception $e ) {
+			$this->fallback_storage->store( $message, $level, wp_json_encode( $context ) );
+		}
 	}
 
 	/**

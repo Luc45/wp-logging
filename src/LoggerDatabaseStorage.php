@@ -44,10 +44,17 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 
 		$table_name = static::get_table_name();
 		$result     = $wpdb->query( $wpdb->prepare( "INSERT INTO `$table_name` (`message`, `log_type`, `log_group`, `created_at`) VALUES (%s, %s, %s, %s)", $message, $type, $group, date( 'Y-m-d H:i:s', time() ) ) );
+
+		if ( ! $result ) {
+			throw new \RuntimeException( 'Could not store log entry.' );
+		}
 	}
 
 	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search = '' ) {
-		$this->check_table();
+		if ( $this->check_table() === self::TABLE_NOT_EXIST ) {
+			return [];
+		}
+
 		global $wpdb;
 
 		$table_name = static::get_table_name();
