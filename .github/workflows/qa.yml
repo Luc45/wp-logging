@@ -14,7 +14,7 @@ jobs:
           path: vendor
           key: ${{ runner.os }}-${{ hashFiles('composer.lock') }}
       - name: Composer install
-        if: steps.cache-composer-manager.outputs.cache-hit != 'true'
+        if: steps.cache-composer.outputs.cache-hit != 'true'
         run: make composer ARGS=install
       - name: PHPCS checks
         run: make phpcs
