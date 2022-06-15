@@ -18,9 +18,9 @@ services:
       - ./docker/wplogging_db/data:/var/lib/mysql
     healthcheck:
       test: "/usr/bin/mysql --user=wplogging --password=wplogging --execute \"SHOW DATABASES;\" wplogging"
-      interval: 2s
-      timeout: 60s
+      interval: 1s
       retries: 30
+      timeout: 3s
 
   wplogging_php:
     container_name: wplogging_php
