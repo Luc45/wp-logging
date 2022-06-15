@@ -24,8 +24,14 @@ class Logger implements LoggerInterface {
 			return;
 		}
 
-		$this->storage          = call_user_func( apply_filters( 'wplogging_storage', [ $this, 'make_database_storage' ] ) );
-		$this->fallback_storage = call_user_func( apply_filters( 'wplogging_fallback_storage', [ $this, 'make_error_log_storage' ] ) );
+		$this->storage          = call_user_func( apply_filters( 'wplogging_storage', [
+			$this,
+			'make_database_storage',
+		] ) );
+		$this->fallback_storage = call_user_func( apply_filters( 'wplogging_fallback_storage', [
+			$this,
+			'make_error_log_storage',
+		] ) );
 	}
 
 	/**
@@ -54,7 +60,11 @@ class Logger implements LoggerInterface {
 		try {
 			$this->storage->store( $message, $level, wp_json_encode( $context ) );
 		} catch ( \Exception $e ) {
-			$this->fallback_storage->store( $message, $level, wp_json_encode( $context ) );
+			try {
+				$this->fallback_storage->store( $message, $level, wp_json_encode( $context ) );
+			} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				// no-op.
+			}
 		}
 	}
 

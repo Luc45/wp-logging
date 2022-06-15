@@ -2,6 +2,6 @@
 
 namespace WPLogging;
 
-class LoggerCommand {
+class LoggerWpCliCommand {
 
 }

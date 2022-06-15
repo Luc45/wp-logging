@@ -27,15 +27,11 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	 */
 	const TABLE_VERSION_KEY = 'wp_logging_table_version';
 
+
 	/**
-	 * @param $message
-	 * @param $type
-	 * @param string  $context
-	 * @param $group
-	 *
-	 * @return void
+	 * @inheritdoc
 	 */
-	public function store( $message, $type, $context = '', $group = '' ) {
+	public function store( $message, $type, $context_json = '', $group = '' ) {
 		if ( $this->check_table() === self::TABLE_NOT_EXIST ) {
 			return;
 		}
@@ -43,13 +39,16 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 		global $wpdb;
 
 		$table_name = static::get_table_name();
-		$result     = $wpdb->query( $wpdb->prepare( "INSERT INTO `$table_name` (`message`, `log_type`, `log_group`, `created_at`) VALUES (%s, %s, %s, %s)", $message, $type, $group, date( 'Y-m-d H:i:s', time() ) ) );
+		$result     = $wpdb->query( $wpdb->prepare( "INSERT INTO `$table_name` (`message`, `log_type`, `log_group`, `created_at`) VALUES (%s, %s, %s, %s)", $message, $type, $group, gmdate( 'Y-m-d H:i:s', time() ) ) ); //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( ! $result ) {
 			throw new \RuntimeException( 'Could not store log entry.' );
 		}
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search = '' ) {
 		if ( $this->check_table() === self::TABLE_NOT_EXIST ) {
 			return [];
@@ -61,20 +60,20 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 		$where      = "SELECT * FROM `$table_name` WHERE 1=1";
 
 		if ( ! empty( $group ) ) {
-			$where .= $wpdb->prepare( " AND `log_group` = '%s'", $group );
+			$where .= $wpdb->prepare( ' AND `log_group` = %s', $group );
 		}
 
 		if ( ! empty( $type ) ) {
-			$where .= $wpdb->prepare( " AND `log_type` = '%s'", $type );
+			$where .= $wpdb->prepare( ' AND `log_type` = %s', $type );
 		}
 
 		if ( ! empty( $search ) ) {
-			$where .= $wpdb->prepare( " AND `message` LIKE '%s'", $wpdb->esc_like( $search ) );
+			$where .= $wpdb->prepare( ' AND `message` LIKE %s', $wpdb->esc_like( $search ) );
 		}
 
 		$where .= $wpdb->prepare( ' LIMIT %d, %d', max( 0, ( $page - 1 ) ) * $qty, max( 1, $qty ) );
 
-		$results = $wpdb->get_results( $where, ARRAY_A );
+		$results = $wpdb->get_results( $where, ARRAY_A ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return $results;
 	}
@@ -136,7 +135,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 
 		$db_delta_queries = [];
 
-		// A Closure that will collect, and empty, the SQL queries `dbdelta` would run to, then, run using
+		// A Closure that will collect, and empty, the SQL queries `dbdelta` would run to, then, run them in a transaction.
 		$collect_db_delta_queries = static function ( $queries ) use ( &$db_delta_queries, &$collect_db_delta_queries ) {
 			// Self remove.
 			remove_filter( 'dbdelta_queries', $collect_db_delta_queries );
@@ -150,19 +149,19 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 		dbDelta( $table_sql, false );
 
 		// Run the collected queries in a transaction.
-		if ( $wpdb->query( 'START TRANSACTION' ) === false ) {
+		if ( $wpdb->query( 'START TRANSACTION' ) === false ) { //phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			return self::TABLE_NOT_EXIST;
 		}
 
 		foreach ( $db_delta_queries as $query ) {
-			if ( $wpdb->query( $query ) === false ) {
+			if ( $wpdb->query( $query ) === false ) { //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 				$wpdb->query( 'ROLLBACK' );
 
 				return self::TABLE_NOT_EXIST;
 			}
 		}
 
-		if ( $wpdb->query( 'COMMIT' ) === false ) {
+		if ( $wpdb->query( 'COMMIT' ) === false ) { //phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			return self::TABLE_NOT_EXIST;
 		}
 
@@ -205,13 +204,13 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	public function table_exists() {
 		global $wpdb;
 		$table_name = self::get_table_name();
-		$result     = $wpdb->query( "SHOW TABLES LIKE '{$table_name}'" );
+		$result     = $wpdb->query( "SHOW TABLES LIKE `$table_name`" ); //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( $result === false ) {
 			return false;
 		}
 
-		$value = $wpdb->get_row( $result );
+		$value = $wpdb->get_row( $result ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return $value === [ $table_name ];
 	}
@@ -225,7 +224,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 		global $wpdb;
 		$collate     = $wpdb->collate;
 		$queue_table = self::get_table_name();
-		$table_sql   = "CREATE TABLE {$queue_table} (
+		$table_sql   = "CREATE TABLE `$queue_table` (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             message LONGTEXT DEFAULT NULL,
             log_type VARCHAR(1000) DEFAULT NULL,
@@ -248,8 +247,8 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	public function drop_table() {
 		global $wpdb;
 		$table_name = self::get_table_name();
-		$query      = "DROP TABLE IF EXISTS {$table_name}";
-		$wpdb->query( $query, true );
+		$query      = "DROP TABLE IF EXISTS `$table_name`";
+		$wpdb->query( $query, true ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$this->table_state = self::TABLE_NOT_EXIST;
 
 		return ! $this->table_exists();
@@ -267,7 +266,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	public function purge() {
 		global $wpdb;
 		$table_name = self::get_table_name();
-		$query      = "TRUNCATE {$table_name}";
-		$wpdb->query( $query, true );
+		$query      = "TRUNCATE `$table_name`";
+		$wpdb->query( $query, true ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 	}
 }
