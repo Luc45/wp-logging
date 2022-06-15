@@ -17,7 +17,7 @@ services:
     volumes:
       - ./docker/wplogging_db/data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysql -uwplogging -pwplogging -hlocalhost -e 'SHOW DATABASES;' wplogging || exit 1"]
+      test: ["CMD-SHELL", "mysql --user=wplogging --password=wplogging --execute 'SHOW DATABASES;' wplogging"]
       interval: 2s
       timeout: 60s
       retries: 30
