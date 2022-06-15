@@ -39,6 +39,13 @@ class Logger implements LoggerInterface {
 	}
 
 	/**
+	 * @return LoggerStorageInterface
+	 */
+	public function make_error_log_storage() {
+		return new LoggerErrorLogStorage();
+	}
+
+	/**
 	 * @param int    $qty How many results per page.
 	 * @param int    $page Page parameter.
 	 * @param string $group Which log group to retrieve results for.

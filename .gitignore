@@ -4,3 +4,4 @@ dev
 .idea
 tests/tmp
 docker/wplogging_db/data
+.phpunit.result.cache

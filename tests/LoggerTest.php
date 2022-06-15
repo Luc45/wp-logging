@@ -3,7 +3,7 @@
 class LoggerTest extends WP_UnitTestCase {
 	use \Spatie\Snapshots\MatchesSnapshots;
 
-	public function test_add_log() {
+	public function test_add_get_log() {
 		$logger = new \WPLogging\Logger();
 		$logger->info( 'Foo' );
 
