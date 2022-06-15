@@ -47,8 +47,6 @@ class Logger implements LoggerInterface {
 	 * @param array  $context
 	 *
 	 * @return void
-	 *
-	 * @throws \InvalidArgumentException
 	 */
 	public function log( $level, $message, array $context = [] ) {
 		$this->register();
