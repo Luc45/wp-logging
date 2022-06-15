@@ -20,5 +20,7 @@ jobs:
         run: make phpcs
       - name: PHPStan checks
         run: make phpstan
-      - name: Unit tests
-        run: make up && make phpunit
+      - name: Setup Unit tests environment
+        run: make up
+      - name: Run Unit tests
+        run: make phpunit
