@@ -1,0 +1,14 @@
+[
+    {
+        "message": "Foo",
+        "context_json": "[]",
+        "log_type": "info",
+        "log_group": ""
+    },
+    {
+        "message": "Foo",
+        "context_json": "[]",
+        "log_type": "critical",
+        "log_group": ""
+    }
+]

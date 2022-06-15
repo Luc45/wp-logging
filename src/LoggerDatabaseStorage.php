@@ -39,7 +39,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 		global $wpdb;
 
 		$table_name = static::get_table_name();
-		$result     = $wpdb->query( $wpdb->prepare( "INSERT INTO `$table_name` (`message`, `log_type`, `log_group`, `created_at`) VALUES (%s, %s, %s, %s)", $message, $type, $group, gmdate( 'Y-m-d H:i:s', time() ) ) ); //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$result     = $wpdb->query( $wpdb->prepare( "INSERT INTO `$table_name` (`message`, `log_type`, `log_group`, `context_json`, `created_at`) VALUES (%s, %s, %s, %s, %s)", $message, $type, $group, $context_json, gmdate( 'Y-m-d H:i:s', time() ) ) ); //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( ! $result ) {
 			throw new \RuntimeException( 'Could not store log entry.' );
@@ -133,37 +133,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-		$db_delta_queries = [];
-
-		// A Closure that will collect, and empty, the SQL queries `dbdelta` would run to, then, run them in a transaction.
-		$collect_db_delta_queries = static function ( $queries ) use ( &$db_delta_queries, &$collect_db_delta_queries ) {
-			// Self remove.
-			remove_filter( 'dbdelta_queries', $collect_db_delta_queries );
-			$db_delta_queries = $queries;
-
-			// Return an empty array to avoid dbDelta from actually running the queries.
-			return [];
-		};
-
-		add_filter( 'dbdelta_queries', $collect_db_delta_queries );
-		dbDelta( $table_sql, false );
-
-		// Run the collected queries in a transaction.
-		if ( $wpdb->query( 'START TRANSACTION' ) === false ) { //phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			return self::TABLE_NOT_EXIST;
-		}
-
-		foreach ( $db_delta_queries as $query ) {
-			if ( $wpdb->query( $query ) === false ) { //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->query( 'ROLLBACK' );
-
-				return self::TABLE_NOT_EXIST;
-			}
-		}
-
-		if ( $wpdb->query( 'COMMIT' ) === false ) { //phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			return self::TABLE_NOT_EXIST;
-		}
+		dbDelta( $table_sql, true );
 
 		$this->update_table_version_option( $this->get_table_version() );
 
@@ -193,7 +163,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	 *              side-effect of updating the plugin options.
 	 */
 	private function update_table_version_option( $table_version ) {
-		update_option( self::TABLE_VERSION_KEY, $table_version );
+		update_option( self::TABLE_VERSION_KEY, $table_version, false );
 	}
 
 	/**
@@ -204,7 +174,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	public function table_exists() {
 		global $wpdb;
 		$table_name = self::get_table_name();
-		$result     = $wpdb->query( "SHOW TABLES LIKE `$table_name`" ); //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$result     = $wpdb->query( "SHOW TABLES LIKE '$table_name'" ); //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( $result === false ) {
 			return false;
@@ -227,6 +197,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 		$table_sql   = "CREATE TABLE `$queue_table` (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             message LONGTEXT DEFAULT NULL,
+            context_json LONGTEXT DEFAULT NULL,
             log_type VARCHAR(1000) DEFAULT NULL,
             log_group VARCHAR(1000) DEFAULT NULL,
             created_at DATETIME DEFAULT NULL,

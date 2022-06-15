@@ -1,7 +1,7 @@
 [
     {
         "message": "Foo",
-        "context_json": "[]",
+        "context_json": "{\"foo\":\"bar\"}",
         "log_type": "info",
         "log_group": ""
     }

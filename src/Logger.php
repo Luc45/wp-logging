@@ -28,6 +28,9 @@ class Logger implements LoggerInterface {
 	/** @var LoggerStorageInterface|null $fallback_storage */
 	protected $fallback_storage;
 
+	/** @var string This Logger group */
+	protected $group = '';
+
 	/**
 	 * @return void
 	 */
@@ -81,7 +84,7 @@ class Logger implements LoggerInterface {
 		$this->register();
 
 		try {
-			$this->storage->store( $message, $level, wp_json_encode( $context ) );
+			$this->storage->store( $message, $level, wp_json_encode( $context ), $this->group );
 		} catch ( \Exception $e ) {
 			// Early bail: Fallback storage disabled.
 			if ( is_null( $this->fallback_storage ) ) {
@@ -89,7 +92,7 @@ class Logger implements LoggerInterface {
 			}
 
 			try {
-				$this->fallback_storage->store( $message, $level, wp_json_encode( $context ) );
+				$this->fallback_storage->store( $message, $level, wp_json_encode( $context ), $group );
 			} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 				// no-op.
 			}
@@ -102,6 +105,15 @@ class Logger implements LoggerInterface {
 	public function purge() {
 		$this->storage->purge();
 		$this->fallback_storage->purge();
+	}
+
+	/**
+	 * @param string $group The Logger group.
+	 *
+	 * @return void
+	 */
+	public function set_group($group) {
+		$this->group = $group;
 	}
 
 	/**
