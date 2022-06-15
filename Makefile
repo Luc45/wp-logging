@@ -46,7 +46,7 @@ define execComposer
 endef
 
 up: ## Start the docker stack
-	docker-compose up -d
+	docker compose up -d
 
 down: ## Stop the docker stack
 	docker compose down

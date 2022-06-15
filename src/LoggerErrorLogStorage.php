@@ -23,4 +23,11 @@ class LoggerErrorLogStorage implements LoggerStorageInterface {
 	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search_message = '' ) {
 		return [];
 	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function purge() {
+		return false;
+	}
 }

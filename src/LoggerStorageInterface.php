@@ -23,4 +23,9 @@ interface LoggerStorageInterface {
 	 * @return array<scalar>
 	 */
 	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search_message = '' );
+
+	/**
+	 * @return bool True if purged, false if not.
+	 */
+	public function purge();
 }

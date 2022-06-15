@@ -12,6 +12,16 @@ class Logger implements LoggerInterface {
 	const INFO      = 'info';
 	const DEBUG     = 'debug';
 
+	/**
+	 * @var array<string> The array keys of a log entry array.
+	 */
+	public static $columns = [
+		'message',
+		'log_type',
+		'log_group',
+		'created_at',
+	];
+
 	/** @var LoggerStorageInterface|null $storage */
 	protected $storage;
 
@@ -84,6 +94,14 @@ class Logger implements LoggerInterface {
 				// no-op.
 			}
 		}
+	}
+
+	/**
+	 * @return void
+	 */
+	public function purge() {
+		$this->storage->purge();
+		$this->fallback_storage->purge();
 	}
 
 	/**
