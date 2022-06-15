@@ -1,0 +1,24 @@
+name: QA Checks
+on:
+  push
+jobs:
+  qa_checks:
+    name: QA Checks
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: actions/cache@v3
+        id: cache-composer
+        with:
+          path: vendor
+          key: ${{ runner.os }}-${{ hashFiles('composer.lock') }}
+      - name: Composer install
+        if: steps.cache-composer-manager.outputs.cache-hit != 'true'
+        run: make composer ARGS=install
+      - name: PHPCS checks
+        run: make phpcs
+      - name: PHPStan checks
+        run: make phpstan
+      - name: Unit tests
+        run: make up && make phpunit
