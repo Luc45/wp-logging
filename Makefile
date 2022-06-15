@@ -46,7 +46,7 @@ define execComposer
 endef
 
 up: ## Start the docker stack
-	DOCKER_RUN_USER=$(shell id -u) DOCKER_RUN_GROUP=$(shell id -g) docker-compose up
+	DOCKER_RUN_USER=$(shell id -u) DOCKER_RUN_GROUP=$(shell id -g) docker-compose up -d && docker compose logs -f
 
 down: ## Stop the docker stack
 	docker compose down
