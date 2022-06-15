@@ -19,7 +19,9 @@ jobs:
       - name: Composer install
         if: steps.cache-composer.outputs.cache-hit != 'true'
         run: make composer ARGS=install
-      - name: Setup Unit tests environment
+      - name: Start Docker Containers
         run: make up
+      - name: Setup Unit tests environment
+        run: make setup
       - name: Run Unit tests
         run: make phpunit
