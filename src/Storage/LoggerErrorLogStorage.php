@@ -14,7 +14,8 @@ class LoggerErrorLogStorage implements LoggerStorageInterface {
 			'[%s - %s] %s%s (%s)',
 			strtoupper( $type ),
 			gmdate( 'Y-m-d H:i:s', time() ),
-			$message, empty( $group ) ? '' : "$group - ",
+			empty( $group ) ? '' : "$group - ",
+			$message,
 			wp_json_encode( $context )
 		) );
 	}
