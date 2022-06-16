@@ -1,6 +1,8 @@
 <?php
 
-namespace WPLogging;
+namespace WPLogging\Storage;
+
+use WPLogging\LoggerEntriesCollection;
 
 class LoggerDatabaseStorage implements LoggerStorageInterface {
 	/**

@@ -1,6 +1,8 @@
 <?php
 
-namespace WPLogging;
+namespace WPLogging\Storage;
+
+use WPLogging\LoggerEntriesCollection;
 
 /**
  * You can create your own Logger storage by implementing this interface

@@ -2,6 +2,10 @@
 
 namespace WPLogging;
 
+use WPLogging\Storage\LoggerDatabaseStorage;
+use WPLogging\Storage\LoggerErrorLogStorage;
+use WPLogging\Storage\LoggerStorageInterface;
+
 class Logger implements LoggerInterface {
 	const EMERGENCY = 'emergency';
 	const ALERT     = 'alert';
