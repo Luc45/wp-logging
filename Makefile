@@ -57,10 +57,10 @@ enter: ## Opens a bash shell in the running `php-fpm` container.
 	docker exec -it --user $(DOCKER_USER) -w /var/wplogging wplogging_php bash
 
 phpcs: ## Run code style checks using phpcs.
-	$(call execPhpAlpine,/app/vendor/bin/phpcs /app/src -s --standard=/app/.phpcs.xml.dist)
+	$(call execPhpAlpine,/app/vendor/bin/phpcs /app/wp-logging/src -s --standard=/app/.phpcs.xml.dist)
 
 phpcbf: ## Run code style fixes using phpcbf.
-	$(call execPhpAlpine,/app/vendor/bin/phpcbf /app/src -s --standard=/app/.phpcs.xml.dist)
+	$(call execPhpAlpine,/app/vendor/bin/phpcbf /app/wp-logging/src -s --standard=/app/.phpcs.xml.dist)
 
 phpstan:
 	$(call execPhpAlpine,/app/vendor/bin/phpstan -vvv analyse -c /app/phpstan.neon)

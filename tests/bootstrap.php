@@ -5,6 +5,8 @@
  * @package Cd_Manager
  */
 
+require_once '/var/wplogging/wp-logging/vendor/autoload.php';
+
 $_tests_dir = '/var/wplogging/tests/tmp/wordpress-tests-lib';
 
 // Forward custom PHPUnit Polyfills configuration to PHPUnit bootstrap file.

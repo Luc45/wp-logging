@@ -1,0 +1,20 @@
+{
+  "name": "luc45/wp-logging",
+  "description": "Programmatic logging for WordPress with WP-CLI support",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "WPLogging\\": "src"
+    }
+  },
+  "authors": [
+    {
+      "name": "Lucas Bustamante",
+      "email": "lucas.bustamante@automattic.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.6"
+  }
+}
