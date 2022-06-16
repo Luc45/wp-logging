@@ -92,7 +92,7 @@ class Logger implements LoggerInterface {
 			}
 
 			try {
-				$this->fallback_storage->store( $message, $level, wp_json_encode( $context ), $group );
+				$this->fallback_storage->store( $message, $level, wp_json_encode( $context ), $this->group );
 			} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 				// no-op.
 			}
@@ -112,7 +112,7 @@ class Logger implements LoggerInterface {
 	 *
 	 * @return void
 	 */
-	public function set_group($group) {
+	public function set_group( $group ) {
 		$this->group = $group;
 	}
 
