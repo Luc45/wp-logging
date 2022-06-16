@@ -68,7 +68,7 @@ class LoggerWpCliCommand {
 		}
 
 		// @phpstan-ignore-next-line
-		\WP_CLI\Utils\format_items( 'table', $log_entries, Logger::$columns );
+		\WP_CLI\Utils\format_items( 'table', $log_entries, LoggerEntriesCollection::$columns );
 		\WP_CLI::success( '' );
 	}
 

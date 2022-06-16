@@ -7,6 +7,17 @@ class LoggerEntriesCollection {
 	protected $logs = [];
 
 	/**
+	 * @var array<string> The array keys of a log entry.
+	 */
+	public static $columns = [
+		'message',
+		'type',
+		'group',
+		'context_json',
+		'date'
+	];
+
+	/**
 	 * Normalize log entries in a specific format.
 	 *
 	 * @param string $message
