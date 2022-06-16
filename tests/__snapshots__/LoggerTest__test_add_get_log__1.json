@@ -1,8 +1,9 @@
 [
     {
         "message": "Foo",
+        "type": "info",
+        "group": "",
         "context_json": "[]",
-        "log_type": "info",
-        "log_group": ""
+        "date": "2022-06-16 20:53:13"
     }
 ]

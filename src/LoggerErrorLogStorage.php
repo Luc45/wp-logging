@@ -21,7 +21,7 @@ class LoggerErrorLogStorage implements LoggerStorageInterface {
 	 * @inheritdoc
 	 */
 	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search_message = '' ) {
-		return [];
+		return new LoggerEntriesCollection();
 	}
 
 	/**

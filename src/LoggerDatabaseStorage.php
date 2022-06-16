@@ -51,7 +51,7 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	 */
 	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search_message = '' ) {
 		if ( $this->check_table() === self::TABLE_NOT_EXIST ) {
-			return [];
+			return new LoggerEntriesCollection();
 		}
 
 		global $wpdb;
@@ -75,7 +75,19 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 
 		$results = $wpdb->get_results( $where, ARRAY_A ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
-		return $results;
+		$collection = new LoggerEntriesCollection();
+
+		foreach ( $results as $r ) {
+			$collection->add(
+				$r['message'],
+				$r['log_type'],
+				$r['log_group'],
+				$r['context_json'],
+				$r['created_at']
+			);
+		}
+
+		return $collection;
 	}
 
 	/**

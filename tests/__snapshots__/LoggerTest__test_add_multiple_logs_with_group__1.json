@@ -1,14 +1,16 @@
 [
     {
         "message": "Foo",
+        "type": "info",
+        "group": "Foo Group",
         "context_json": "[]",
-        "log_type": "info",
-        "log_group": "Foo Group"
+        "date": "2022-06-16 20:53:13"
     },
     {
         "message": "Foo",
+        "type": "critical",
+        "group": "Foo Group",
         "context_json": "[]",
-        "log_type": "critical",
-        "log_group": "Foo Group"
+        "date": "2022-06-16 20:53:13"
     }
 ]

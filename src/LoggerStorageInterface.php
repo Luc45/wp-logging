@@ -2,6 +2,10 @@
 
 namespace WPLogging;
 
+/**
+ * You can create your own Logger storage by implementing this interface
+ * and returning an instance through the filter "wplogging_storage".
+ */
 interface LoggerStorageInterface {
 	/**
 	 * @param string $message The log message to store.
@@ -20,7 +24,7 @@ interface LoggerStorageInterface {
 	 * @param string $type Which log type to retrieve results for.
 	 * @param string $search_message Which log message to search for.
 	 *
-	 * @return array<scalar>
+	 * @return LoggerEntriesCollection
 	 */
 	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search_message = '' );
 

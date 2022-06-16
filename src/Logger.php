@@ -65,10 +65,10 @@ class Logger implements LoggerInterface {
 	 * @param string $type Which log type to retrieve results for.
 	 * @param string $search_message Which log message to search for.
 	 *
-	 * @return array<scalar>
+	 * @return array<array<scalar>> An array of log entries, where all array items are scalars.
 	 */
 	public function get( $qty = 50, $page = 1, $group = '', $type = '', $search_message = '' ) {
-		return $this->storage->get( $qty, $page, $group, $type, $search_message );
+		return $this->storage->get( $qty, $page, $group, $type, $search_message )->to_array();
 	}
 
 	/**
