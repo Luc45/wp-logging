@@ -254,11 +254,6 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	 * @return bool
 	 */
 	public function purge() {
-		global $wpdb;
-		$table_name = self::get_table_name();
-		$query      = "TRUNCATE `$table_name`";
-		$result     = $wpdb->query( $query, true ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-
-		return $result === true;
+		$this->drop_table();
 	}
 }
