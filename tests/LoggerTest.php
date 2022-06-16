@@ -5,8 +5,7 @@ class LoggerTest extends WP_UnitTestCase {
 
 	protected function normalize_log_for_snapshot( array $result ) {
 		foreach ( $result as &$r ) {
-			unset( $r['created_at'] );
-			unset( $r['id'] );
+			$r['date'] = 'snapshot_normalized';
 		}
 
 		return $result;
