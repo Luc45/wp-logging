@@ -19,5 +19,7 @@ jobs:
       - name: Composer install
         if: steps.cache-composer.outputs.cache-hit != 'true'
         run: make composer ARGS=install
+      - name: wp-logging composer
+        run: make composerwp ARGS=dump-autoload
       - name: PHPStan checks
         run: make phpstan

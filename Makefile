@@ -68,6 +68,9 @@ phpstan:
 composer:
 	$(call execComposer,/app,$(ARGS))
 
+composerwp:
+	$(call execComposer,/app/wp-logging,$(ARGS))
+
 fix_autocomplete: ## Provides autocompletion for WP_CLI and WP specific PHPUnit classes.
 	if [ ! -d "./dev/wordpress-develop" ]; then git clone --depth=1 --branch=master git@github.com:WordPress/wordpress-develop.git ./dev/wordpress-develop; fi;
 	if [ ! -d "./dev/wp-cli" ]; then mkdir -p ./dev/wp-cli && composer --working-dir=./dev/wp-cli require wp-cli/wp-cli-bundle; fi;
