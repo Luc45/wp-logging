@@ -8,4 +8,4 @@
 - Zero dependencies.
 - PHP 5.6 compatible.
 - WordPress 4+ compatible.
-- Not tested. Currently in development. :construction:
+- Not ready for use. Currently under development. :construction:
