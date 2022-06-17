@@ -14,7 +14,7 @@ class LoggerEntriesCollection {
 		'type',
 		'group',
 		'context_json',
-		'date'
+		'date',
 	];
 
 	/**

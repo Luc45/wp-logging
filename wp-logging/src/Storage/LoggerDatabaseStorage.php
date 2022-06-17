@@ -254,6 +254,6 @@ class LoggerDatabaseStorage implements LoggerStorageInterface {
 	 * @return bool
 	 */
 	public function purge() {
-		$this->drop_table();
+		return $this->drop_table();
 	}
 }
